@@ -1,6 +1,7 @@
 package com.tunjid.androidx.tablists.tables
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -21,6 +22,7 @@ import com.tunjid.androidx.tabnav.routing.routeName
 import com.tunjid.androidx.uidrivers.UiState
 import com.tunjid.androidx.uidrivers.callback
 import com.tunjid.androidx.uidrivers.uiState
+import com.tunjid.viewpager2.FragmentListAdapter
 import com.tunjid.viewpager2.fragmentListAdapterOf
 
 class ViewPagerListAdapterFragment : Fragment(R.layout.fragment_spreadsheet_parent),
@@ -84,7 +86,15 @@ class ViewPagerListAdapterFragment : Fragment(R.layout.fragment_spreadsheet_pare
     }
 
     override fun augmentTransaction(transaction: FragmentTransaction, incomingFragment: Fragment) {
-        val fragment = childFragmentManager.findFragmentByTag("f${binding.viewPager.adapter?.getItemId(binding.viewPager.currentItem)}")
+        val currentItem = binding.viewPager.currentItem
+        val containsItem = (binding.viewPager.adapter as? FragmentListAdapter<*>)?.containsItem(currentItem.toLong()) == true
+
+        if (!containsItem) {
+            Log.i("ViewPagerListAdapter", "Item $currentItem not found in adapter, not augmenting transaction")
+            return
+        }
+
+        val fragment = childFragmentManager.findFragmentByTag("f${binding.viewPager.adapter?.getItemId(currentItem)}")
         (fragment as? Navigator.TransactionModifier)?.augmentTransaction(transaction, incomingFragment)
     }
 

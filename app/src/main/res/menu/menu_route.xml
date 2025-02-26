@@ -11,6 +11,10 @@
         android:title="@string/menu_stress_test"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/menu_stress_test_intent"
+        android:title="@string/menu_stress_test_intent"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_reset"
         android:title="@string/menu_reset_navigation"
         app:showAsAction="never" />

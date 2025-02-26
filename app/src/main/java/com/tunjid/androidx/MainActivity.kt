@@ -1,11 +1,15 @@
 package com.tunjid.androidx
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.androidx.core.delegates.activityIntent
 import com.tunjid.androidx.databinding.ActivityMainBinding
 import com.tunjid.androidx.navigation.MultiStackNavigator
@@ -31,7 +35,7 @@ class MainActivity : AppCompatActivity(), GlobalUiHost, Navigator.Controller {
         stackCount = tabs.size,
         containerId = R.id.content_container,
         backStackType = MultiStackNavigator.BackStackType.Unlimited,
-        rootFunction = RouteFragment.Companion::newInstance
+        rootFunction = RouteFragment.Companion::newInstance,
     )
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +58,7 @@ class MainActivity : AppCompatActivity(), GlobalUiHost, Navigator.Controller {
             setOnNavigationItemSelectedListener { navigator.show(tabs.indexOf(it.itemId)).let { true } }
             setOnNavigationItemReselectedListener { navigator.activeNavigator.clear() }
         }
+        createNotificationChannel()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -62,5 +67,27 @@ class MainActivity : AppCompatActivity(), GlobalUiHost, Navigator.Controller {
         deepLinkTab
             ?.takeIf { it >= 0 }
             ?.let(navigator::show)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (intent?.getBooleanExtra("stress_test", false) == true) {
+            navigator.performConsecutively(lifecycleScope) {
+                clearAll()
+                push(RouteFragment.newInstance(tabIndex = 0, launchStressTest = true))
+            }
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel(
+                getString(R.string.notification_channel_id),
+                getString(R.string.notification_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                getSystemService(NotificationManager::class.java).createNotificationChannel(this)
+            }
+        }
     }
 }

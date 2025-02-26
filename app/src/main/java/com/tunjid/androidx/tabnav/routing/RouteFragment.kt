@@ -1,6 +1,10 @@
 package com.tunjid.androidx.tabnav.routing
 
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -10,6 +14,8 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,6 +24,7 @@ import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.tunjid.androidx.MainActivity
 import com.tunjid.androidx.R
 import com.tunjid.androidx.core.content.colorAt
 import com.tunjid.androidx.core.content.themeColorAt
@@ -46,6 +53,7 @@ class RouteFragment : Fragment(R.layout.fragment_route) {
     private val navigator by activityNavigatorController<MultiStackNavigator>()
 
     private var tabIndex: Int by fragmentArgs()
+    private var launchStressTest: Boolean by fragmentArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -83,6 +91,10 @@ class RouteFragment : Fragment(R.layout.fragment_route) {
             )
             OverScrollDecoratorHelper.setUpOverScroll(this, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
         }
+
+        if (launchStressTest) {
+            stressTest()
+        }
     }
 
     private fun onMenuItemSelected(item: MenuItem) = when (item.itemId) {
@@ -97,6 +109,7 @@ class RouteFragment : Fragment(R.layout.fragment_route) {
             .show()
             .let { }
         R.id.menu_reset -> navigator.clearAll()
+        R.id.menu_stress_test_intent -> createStressTestIntent()
 
         else -> requireActivity().onOptionsItemSelected(item).let { }
     }
@@ -109,6 +122,31 @@ class RouteFragment : Fragment(R.layout.fragment_route) {
         val (tabIndex, route) = viewModel.randomRoute()
         show(tabIndex)
         push(route.fragment(isTopLevel = true))
+    }
+
+    private fun createStressTestIntent() {
+        val context = requireContext()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            putExtra("stress_test", true)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val notification = NotificationCompat.Builder(context, getString(R.string.notification_channel_id))
+            .setSmallIcon(R.drawable.ic_android_24dp)
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setContentTitle(getString(R.string.stress_test_intent_title))
+            .setContentText(getString(R.string.stress_test_intent_message))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        ContextCompat.getSystemService(context, NotificationManager::class.java)?.notify(0, notification)
     }
 
     private fun stressTest() = navigator.performConsecutively(requireActivity().lifecycleScope) {
@@ -138,7 +176,13 @@ class RouteFragment : Fragment(R.layout.fragment_route) {
     }
 
     companion object {
-        fun newInstance(tabIndex: Int): RouteFragment = RouteFragment().apply { this.tabIndex = tabIndex }
+        fun newInstance(
+            tabIndex: Int,
+            launchStressTest: Boolean = false,
+        ): RouteFragment = RouteFragment().apply {
+            this.tabIndex = tabIndex
+            this.launchStressTest = launchStressTest
+        }
     }
 }
 

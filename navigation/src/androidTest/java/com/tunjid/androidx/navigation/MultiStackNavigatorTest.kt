@@ -13,7 +13,6 @@ import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -85,11 +84,6 @@ class MultiStackNavigatorTest {
         multiStackNavigator.waitForIdleSyncAfter { pop() }.also {
             assertEquals(listOf(0), multiStackNavigator.stackVisitor.hosts().toList())
         }
-    }
-
-    @Test
-    fun testFailure() {
-        fail()
     }
 
     @Test

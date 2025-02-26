@@ -25,4 +25,5 @@ jobs:
         with:
           api-level: 21
           profile: pixel
+          arch: arm64-v8a
           script: ./gradlew :navigation:connectedCheck --stacktrace

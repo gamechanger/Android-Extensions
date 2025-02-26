@@ -33,4 +33,4 @@ jobs:
         with:
           api-level: 21
           profile: pixel
-          script: ./gradlew:core:connectedCheck --stacktrace
+          script: ./gradlew :core:connectedCheck --stacktrace

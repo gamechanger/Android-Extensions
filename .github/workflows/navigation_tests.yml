@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'jetbrains'
-          java-version: '11'
+          java-version: '17'
       - name: Navigation test
         uses: ReactiveCircus/android-emulator-runner@v2.14.3
         with:

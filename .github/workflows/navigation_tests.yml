@@ -21,7 +21,7 @@ jobs:
           distribution: 'jetbrains'
           java-version: '17'
       - name: Navigation test
-        uses: ReactiveCircus/android-emulator-runner@v2.14.3
+        uses: ReactiveCircus/android-emulator-runner@v2.21.0
         with:
           api-level: 21
           profile: pixel

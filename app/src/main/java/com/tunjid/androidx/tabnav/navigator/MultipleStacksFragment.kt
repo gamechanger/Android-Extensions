@@ -54,11 +54,12 @@ class MultipleStacksFragment : Fragment(R.layout.fragment_multiple_stack) {
 
     private val navigator by activityNavigatorController<MultiStackNavigator>()
     internal val innerNavigator: MultiStackNavigator by childMultiStackNavigationController(
-        DESTINATIONS.size,
-        R.id.inner_container
-    ) { index ->
-        MultipleStackChildFragment.newInstance(getChildName(index), 1)
-    }
+        stackCount = DESTINATIONS.size,
+        containerId = R.id.inner_container,
+        rootFunction = { index ->
+            MultipleStackChildFragment.newInstance(getChildName(index), 1)
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

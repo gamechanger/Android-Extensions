@@ -9,7 +9,7 @@ on:
 jobs:
   test:
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -25,5 +25,4 @@ jobs:
         with:
           api-level: 21
           profile: pixel
-          arch: arm64-v8a
           script: ./gradlew :navigation:connectedCheck --stacktrace

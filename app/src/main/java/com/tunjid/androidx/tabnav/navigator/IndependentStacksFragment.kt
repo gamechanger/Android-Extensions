@@ -35,7 +35,7 @@ import com.tunjid.androidx.uidrivers.InsetFlags
 import com.tunjid.androidx.uidrivers.crossFade
 import com.tunjid.androidx.uidrivers.uiState
 import com.tunjid.androidx.uidrivers.updatePartial
-import java.util.*
+import java.util.ArrayDeque
 
 
 class IndependentStacksFragment : Fragment(R.layout.fragment_independent_stack) {
@@ -100,7 +100,9 @@ class IndependentStacksFragment : Fragment(R.layout.fragment_independent_stack) 
     }
 
     private fun navigatorFor(id: Int) = navigators.getOrPut(id) {
-        val stackNavigator by childStackNavigationController(id)
+        val stackNavigator by childStackNavigationController(
+            containerId = id,
+        )
         stackNavigator.apply { transactionModifier = { crossFade() } }
     }
 

@@ -38,6 +38,7 @@
     <string name="menu_reset_navigation">Reset Navigation</string>
     <string name="menu_theme">Toggle theme</string>
     <string name="menu_stress_test">Stress Test</string>
+    <string name="menu_stress_test_intent">Stress Test Intent</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
     <string name="menu_refresh">Refresh</string>
@@ -148,4 +149,9 @@
     <string name="inevitable">I am inevitable</string>
     <string name="survivor">I a survivor</string>
 
+    <!-- Notifications -->
+    <string name="notification_channel_id">android_extensions</string>
+    <string name="notification_channel_name">Android Extensions</string>
+    <string name="stress_test_intent_title">Navigation Stress Test Intent</string>
+    <string name="stress_test_intent_message">Enable Don\'t Keep Activities in Developer Options and open this</string>
 </resources>

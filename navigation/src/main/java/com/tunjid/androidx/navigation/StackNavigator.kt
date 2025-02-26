@@ -12,13 +12,27 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun Fragment.childStackNavigationController(@IdRes containerId: Int): Lazy<StackNavigator> = lazy {
-    StackNavigator(childFragmentManager, containerId)
+fun Fragment.childStackNavigationController(
+    @IdRes containerId: Int,
+    stopInvalidNavigation: Boolean
+): Lazy<StackNavigator> = lazy {
+    StackNavigator(
+        fragmentManager = childFragmentManager,
+        containerId = containerId,
+        stopInvalidNavigation = stopInvalidNavigation
+    )
 }
 
 @Suppress("unused")
-fun FragmentActivity.stackNavigationController(@IdRes containerId: Int): Lazy<StackNavigator> = lazy {
-    StackNavigator(supportFragmentManager, containerId)
+fun FragmentActivity.stackNavigationController(
+    @IdRes containerId: Int,
+    stopInvalidNavigation: Boolean
+): Lazy<StackNavigator> = lazy {
+    StackNavigator(
+        fragmentManager = supportFragmentManager,
+        containerId = containerId,
+        stopInvalidNavigation = stopInvalidNavigation
+    )
 }
 
 /**
@@ -33,7 +47,8 @@ fun FragmentActivity.stackNavigationController(@IdRes containerId: Int): Lazy<St
 
 class StackNavigator constructor(
     internal val fragmentManager: FragmentManager,
-    @param:IdRes @field:IdRes @get:IdRes override val containerId: Int
+    @param:IdRes @field:IdRes @get:IdRes override val containerId: Int,
+    private val stopInvalidNavigation: Boolean,
 ) : Navigator {
 
     /**
@@ -92,6 +107,11 @@ class StackNavigator constructor(
         val fragmentToShow =
             (if (fragmentAlreadyExists) fragmentManager.findFragmentByTag(tag)
             else fragment) ?: throw NullPointerException(MSG_DODGY_FRAGMENT)
+
+        if (stopInvalidNavigation && fragmentManager.isStateSaved) {
+            Log.i("StackNavigator", "Ignoring push call, FragmentManager is in an invalid state")
+            return fragmentShown
+        }
 
         fragmentManager.commit {
             transactionModifier?.invoke(this, fragment)

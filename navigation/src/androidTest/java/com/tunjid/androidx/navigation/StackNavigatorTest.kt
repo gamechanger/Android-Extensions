@@ -48,7 +48,11 @@ class StackNavigatorTest {
     @Before
     fun setUp() {
         activity = activityRule.activity as NavigationTestActivity
-        stackNavigator = StackNavigator(activity.supportFragmentManager, activity.containerId)
+        stackNavigator = StackNavigator(
+            fragmentManager = activity.supportFragmentManager,
+            containerId = activity.containerId,
+            stopInvalidNavigation = true
+        )
     }
 
     @After
@@ -74,7 +78,11 @@ class StackNavigatorTest {
 
         // create new instance of StackNavigator and confirm all
         // the old tags are restored
-        val copy = StackNavigator(activity.supportFragmentManager, activity.containerId)
+        val copy = StackNavigator(
+            fragmentManager = activity.supportFragmentManager,
+            containerId = activity.containerId,
+            stopInvalidNavigation = true
+        )
 
         assertTrue(copy.fragmentTags.contains(testFragment.stableTag))
         assertTrue(copy.fragmentTags.size == 1)

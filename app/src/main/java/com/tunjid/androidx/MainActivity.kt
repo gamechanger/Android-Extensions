@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), GlobalUiHost, Navigator.Controller {
         stackCount = tabs.size,
         containerId = R.id.content_container,
         backStackType = MultiStackNavigator.BackStackType.Unlimited,
+        stopInvalidNavigation = true,
         rootFunction = RouteFragment.Companion::newInstance,
     )
 

@@ -102,6 +102,7 @@ class IndependentStacksFragment : Fragment(R.layout.fragment_independent_stack) 
     private fun navigatorFor(id: Int) = navigators.getOrPut(id) {
         val stackNavigator by childStackNavigationController(
             containerId = id,
+            stopInvalidNavigation = true
         )
         stackNavigator.apply { transactionModifier = { crossFade() } }
     }

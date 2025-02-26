@@ -1,6 +1,7 @@
 package com.tunjid.androidx.navigation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,8 @@ fun Fragment.childMultiStackNavigationController(
     stackCount: Int,
     @IdRes containerId: Int,
     backStackType: MultiStackNavigator.BackStackType = MultiStackNavigator.BackStackType.UniqueEntries,
-    rootFunction: (Int) -> Fragment
+    stopInvalidNavigation: Boolean,
+    rootFunction: (Int) -> Fragment,
 ): Lazy<MultiStackNavigator> = lazy {
     MultiStackNavigator(
         stackCount = stackCount,
@@ -34,7 +36,8 @@ fun Fragment.childMultiStackNavigationController(
         fragmentManager = childFragmentManager,
         containerId = containerId,
         backStackType = backStackType,
-        rootFunction = rootFunction
+        rootFunction = rootFunction,
+        stopInvalidNavigation = stopInvalidNavigation
     )
 }
 
@@ -42,7 +45,8 @@ fun FragmentActivity.multiStackNavigationController(
     stackCount: Int,
     @IdRes containerId: Int,
     backStackType: MultiStackNavigator.BackStackType = MultiStackNavigator.BackStackType.UniqueEntries,
-    rootFunction: (Int) -> Fragment
+    stopInvalidNavigation: Boolean,
+    rootFunction: (Int) -> Fragment,
 ): Lazy<MultiStackNavigator> = lazy {
     MultiStackNavigator(
         stackCount = stackCount,
@@ -50,7 +54,8 @@ fun FragmentActivity.multiStackNavigationController(
         fragmentManager = supportFragmentManager,
         containerId = containerId,
         backStackType = backStackType,
-        rootFunction = rootFunction
+        rootFunction = rootFunction,
+        stopInvalidNavigation = stopInvalidNavigation
     )
 }
 
@@ -64,7 +69,9 @@ class MultiStackNavigator(
     private val fragmentManager: FragmentManager,
     @IdRes override val containerId: Int,
     backStackType: BackStackType = BackStackType.UniqueEntries,
-    private val rootFunction: (Int) -> Fragment) : Navigator {
+    private val stopInvalidNavigation: Boolean,
+    private val rootFunction: (Int) -> Fragment,
+) : Navigator {
 
     /**
      * A callback that will be invoked when a stack is selected, either by the user selecting it,
@@ -213,7 +220,14 @@ class MultiStackNavigator(
     private fun FragmentTransaction.addStackFragments() {
         indices.forEach { index ->
             stackTransactionModifier?.invoke(this, index)
-            add(containerId, StackFragment.newInstance(index), index.toString())
+            add(
+                containerId,
+                StackFragment.newInstance(
+                    index = index,
+                    stopInvalidNavigation = stopInvalidNavigation
+                ),
+                index.toString()
+            )
         }
     }
 
@@ -224,6 +238,11 @@ class MultiStackNavigator(
         override fun onFragmentCreated(fm: FragmentManager, fragment: Fragment, savedInstanceState: Bundle?) = fragment.run {
             if (id != this@MultiStackNavigator.containerId) return
             check(this is StackFragment) { "Only Stack Fragments may be added to a container View managed by a MultiStackNavigator" }
+
+            if (stopInvalidNavigation && fm.isStateSaved) {
+                Log.i("StackNavigator", "Ignoring push call in onFragmentCreated, FragmentManager is in an invalid state")
+                return
+            }
 
             if (index != stackVisitor.currentHost() && isAttached) fm.commit { detach(this@run) }
         }
@@ -252,15 +271,30 @@ class StackFragment : Fragment() {
 
     internal var index: Int by fragmentArgs()
     private var containerId: Int by fragmentArgs()
+    private var stopInvalidNavigation: Boolean by fragmentArgs()
 
     internal val hasNoRoot get() = navigator.current == null
-    internal val navigator by lazy { StackNavigator(childFragmentManager, containerId) }
+    internal val navigator by lazy {
+        StackNavigator(
+            fragmentManager = childFragmentManager,
+            containerId = containerId,
+            stopInvalidNavigation = stopInvalidNavigation,
+        )
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         FragmentContainerView(inflater.context).apply { id = containerId }
 
     companion object {
-        internal fun newInstance(index: Int) = StackFragment().apply { this.index = index; containerId = View.generateViewId() }
+        internal fun newInstance(
+            index: Int,
+            stopInvalidNavigation: Boolean
+        ) =
+            StackFragment().apply {
+                this.index = index
+                this.stopInvalidNavigation = stopInvalidNavigation
+                containerId = View.generateViewId()
+            }
     }
 }
 

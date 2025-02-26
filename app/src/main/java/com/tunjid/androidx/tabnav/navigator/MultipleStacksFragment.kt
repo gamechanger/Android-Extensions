@@ -56,6 +56,7 @@ class MultipleStacksFragment : Fragment(R.layout.fragment_multiple_stack) {
     internal val innerNavigator: MultiStackNavigator by childMultiStackNavigationController(
         stackCount = DESTINATIONS.size,
         containerId = R.id.inner_container,
+        stopInvalidNavigation = true,
         rootFunction = { index ->
             MultipleStackChildFragment.newInstance(getChildName(index), 1)
         }

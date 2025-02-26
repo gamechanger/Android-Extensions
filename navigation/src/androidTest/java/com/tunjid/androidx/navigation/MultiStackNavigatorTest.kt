@@ -337,7 +337,8 @@ class MultiStackNavigatorTest {
                 stateContainer = savedStateFor(activity, "test"),
                 fragmentManager = activity.supportFragmentManager,
                 backStackType = type,
-                containerId = activity.containerId
+                containerId = activity.containerId,
+                stopInvalidNavigation = true,
             ) { NavigationTestFragment.newInstance(TAGS[it]) }
         }
 

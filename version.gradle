@@ -1,6 +1,6 @@
 allprojects {
     def versionKey = project.name + "_version"
-    def versionSuffix = parent.ext.publishInfo['versionSuffix']
+    def versionSuffix = parent.ext.publishInfo?.versionSuffix ?: ""
     group = parent.ext.libProps['groupId']
     def suffix = versionSuffix.isEmpty() ? "" : "-" + versionSuffix
     version = parent.ext.libProps[versionKey] + suffix

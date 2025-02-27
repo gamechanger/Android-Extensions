@@ -30,12 +30,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        // Reduce META-INF file conflicts
-        kotlinOptions.freeCompilerArgs += ['-module-name', "${parent.ext.groupId}.${project.getName()}"]
     }
 
     kotlinOptions {
         jvmTarget = '1.8'
+        freeCompilerArgs += ['-module-name', "${parent.ext.groupId}.${project.getName()}"]
     }
 
     libraryVariants.all { variant ->
@@ -101,6 +100,14 @@ afterEvaluate {
                 }
             }
         }
+    }
+
+    tasks.withType(GenerateModuleMetadata).configureEach {
+        dependsOn("bundleReleaseAar")
+    }
+
+    tasks.matching { task -> task.name.startsWith('publish') }.configureEach { publishTask ->
+        publishTask.dependsOn("bundleReleaseAar")
     }
 
     signing {

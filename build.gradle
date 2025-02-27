@@ -89,20 +89,32 @@ task incrementalPublish {
     def artifactExists = { params ->
         // githubUrl, moduleName, version, true
         def group = libProps['groupId'].replace(".", "/")
-        def url = "${params['downloadUrl']}/${group}/${params['moduleName']}/${params['version']}/${params['moduleName']}-${params['version']}.pom"
+        def moduleName = params['moduleName']
+        def version = params['version']
+
+        def url = "${params['downloadUrl']}/${group}/${moduleName}/${version}/${moduleName}-${version}"
+        def fileTypes = ['aar', 'pom']
 
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection()
-            connection.setRequestProperty("Authorization", params['auth'])
-            connection.connect()
+            // Check AAR AND POM
+            for (String fileType : fileTypes) {
+                def urlWithType = "${url}.${fileType}"
+                HttpURLConnection connection = (HttpURLConnection) new URL(urlWithType).openConnection()
+                connection.setRequestProperty("Authorization", params['auth'])
+                connection.setRequestMethod("HEAD")
+                connection.connect()
+                def exists = connection.getResponseCode() == HttpURLConnection.HTTP_OK
 
-            def exists = connection.getResponseCode() == HttpURLConnection.HTTP_OK
-            println "pom for ${params['moduleName']} exists on $url}: ${exists}"
+                println "Artifact check for ${moduleName}-${version}: ${fileType} exists: ${exists}"
 
-            return exists
+                if (exists) {
+                    return true
+                }
+            }
+            return false
         }
-        catch (ignored) {
-            println "Unable to configure incremental publish for ${name}, check your internet connection"
+        catch (exception) {
+            println "Unable to configure incremental publish ${exception}"
             return null
         }
     }

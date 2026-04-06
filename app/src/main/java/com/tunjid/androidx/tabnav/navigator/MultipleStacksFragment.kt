@@ -57,6 +57,7 @@ class MultipleStacksFragment : Fragment(R.layout.fragment_multiple_stack) {
         stackCount = DESTINATIONS.size,
         containerId = R.id.inner_container,
         stopInvalidNavigation = true,
+        initialIndex = 0,
         rootFunction = { index ->
             MultipleStackChildFragment.newInstance(getChildName(index), 1)
         }

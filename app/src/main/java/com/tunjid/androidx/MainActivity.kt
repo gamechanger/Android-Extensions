@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity(), GlobalUiHost, Navigator.Controller {
         backStackType = MultiStackNavigator.BackStackType.Unlimited,
         stopInvalidNavigation = true,
         rootFunction = RouteFragment.Companion::newInstance,
+        initialIndex = 0
     )
 
     public override fun onCreate(savedInstanceState: Bundle?) {

@@ -26,6 +26,7 @@ const val MULTI_STACK_NAVIGATOR = "com.tunjid.androidx.navigation.MultiStackNavi
 fun Fragment.childMultiStackNavigationController(
     stackCount: Int,
     @IdRes containerId: Int,
+    initialIndex: Int,
     backStackType: MultiStackNavigator.BackStackType = MultiStackNavigator.BackStackType.UniqueEntries,
     stopInvalidNavigation: Boolean,
     rootFunction: (Int) -> Fragment,
@@ -34,6 +35,7 @@ fun Fragment.childMultiStackNavigationController(
         stackCount = stackCount,
         stateContainer = savedStateFor(this@childMultiStackNavigationController, "$MULTI_STACK_NAVIGATOR-$containerId"),
         fragmentManager = childFragmentManager,
+        initialIndex = initialIndex,
         containerId = containerId,
         backStackType = backStackType,
         rootFunction = rootFunction,
@@ -44,6 +46,7 @@ fun Fragment.childMultiStackNavigationController(
 fun FragmentActivity.multiStackNavigationController(
     stackCount: Int,
     @IdRes containerId: Int,
+    initialIndex: Int,
     backStackType: MultiStackNavigator.BackStackType = MultiStackNavigator.BackStackType.UniqueEntries,
     stopInvalidNavigation: Boolean,
     rootFunction: (Int) -> Fragment,
@@ -52,6 +55,7 @@ fun FragmentActivity.multiStackNavigationController(
         stackCount = stackCount,
         stateContainer = savedStateFor(this@multiStackNavigationController, "$MULTI_STACK_NAVIGATOR-$containerId"),
         fragmentManager = supportFragmentManager,
+        initialIndex = initialIndex,
         containerId = containerId,
         backStackType = backStackType,
         rootFunction = rootFunction,
@@ -66,6 +70,7 @@ fun FragmentActivity.multiStackNavigationController(
 class MultiStackNavigator(
     stackCount: Int,
     stateContainer: LifecycleSavedStateContainer,
+    private val initialIndex: Int,
     private val fragmentManager: FragmentManager,
     @IdRes override val containerId: Int,
     backStackType: BackStackType = BackStackType.UniqueEntries,
@@ -98,7 +103,11 @@ class MultiStackNavigator(
         }
 
     private val indices = 0 until stackCount
-    internal val stackVisitor = MultiStackVisitor(backStackType, stateContainer)
+    internal val stackVisitor = MultiStackVisitor(
+        backStackType = backStackType,
+        container = stateContainer,
+        initialIndex = initialIndex
+    )
 
     internal val stackFragments: List<StackFragment>
         get() = indices
@@ -300,7 +309,8 @@ class StackFragment : Fragment() {
 
 internal class MultiStackVisitor(
     private val backStackType: MultiStackNavigator.BackStackType,
-    private val container: LifecycleSavedStateContainer
+    private val container: LifecycleSavedStateContainer,
+    private val initialIndex: Int
 ) {
 
     init {
@@ -309,7 +319,7 @@ internal class MultiStackVisitor(
     }
 
     private val delegate = (container.savedState.getIntArray(NAV_STACK_ORDER)
-        ?: intArrayOf(0)).toMutableList()
+        ?: intArrayOf(initialIndex)).toMutableList()
 
     fun visit(value: Int) = delegate.run {
         when (backStackType) {
@@ -333,7 +343,7 @@ internal class MultiStackVisitor(
 
     fun leaveAll(): Unit = delegate.run {
         clear()
-        add(0)
+        add(initialIndex)
         saveState()
     }
 

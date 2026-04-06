@@ -325,11 +325,26 @@ class MultiStackNavigatorTest {
         }
     }
 
+    @Test
+    fun passingInitialIndexShows() = runBlocking {
+        val multiStackNavigator = multiStackNavigator(MultiStackNavigator.BackStackType.UniqueEntries, initialIndex = 1)
+        assertSame(ROOT_TAG_1, multiStackNavigator.current?.tag)
+    }
+
+    @Test
+    fun noInitialIndexShowsFirstIndex() = runBlocking {
+        val multiStackNavigator = multiStackNavigator(MultiStackNavigator.BackStackType.UniqueEntries, initialIndex = 0)
+        assertSame(ROOT_TAG_0, multiStackNavigator.current?.tag)
+    }
+
     private fun MultiStackNavigator.assertNavigatorIndices(vararg tags: String?) {
         tags.forEachIndexed { index, tag -> assertEquals(tag, navigatorAt(index)?.current?.tag) }
     }
 
-    private fun multiStackNavigator(type: MultiStackNavigator.BackStackType): MultiStackNavigator {
+    private fun multiStackNavigator(
+        type: MultiStackNavigator.BackStackType,
+        initialIndex: Int = 0
+    ): MultiStackNavigator {
         var navigator: MultiStackNavigator? = null
         instrumentation.runOnMainSync {
             navigator = MultiStackNavigator(
@@ -339,6 +354,7 @@ class MultiStackNavigatorTest {
                 backStackType = type,
                 containerId = activity.containerId,
                 stopInvalidNavigation = true,
+                initialIndex = initialIndex
             ) { NavigationTestFragment.newInstance(TAGS[it]) }
         }
 

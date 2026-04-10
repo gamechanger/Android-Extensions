@@ -337,6 +337,16 @@ class MultiStackNavigatorTest {
         assertSame(ROOT_TAG_0, multiStackNavigator.current?.tag)
     }
 
+    @Test
+    fun clearAllShowsInitialIndex() = runBlocking {
+        val multiStackNavigator = multiStackNavigator(MultiStackNavigator.BackStackType.UniqueEntries, initialIndex = 1)
+        multiStackNavigator.performConsecutively(this) {
+            push(NavigationTestFragment.newInstance(TAG_A))
+            clearAll()
+            assertSame(ROOT_TAG_1, multiStackNavigator.current?.tag)
+        }
+    }
+
     private fun MultiStackNavigator.assertNavigatorIndices(vararg tags: String?) {
         tags.forEachIndexed { index, tag -> assertEquals(tag, navigatorAt(index)?.current?.tag) }
     }

@@ -70,7 +70,7 @@ fun FragmentActivity.multiStackNavigationController(
 class MultiStackNavigator(
     stackCount: Int,
     stateContainer: LifecycleSavedStateContainer,
-    private val initialIndex: Int,
+    internal val initialIndex: Int,
     private val fragmentManager: FragmentManager,
     @IdRes override val containerId: Int,
     backStackType: BackStackType = BackStackType.UniqueEntries,

@@ -35,7 +35,7 @@ class SuspendingMultiStackNavigator internal constructor(
         mainThreadSuspendCancellableCoroutine<Unit> { continuation ->
             navigator.reset(commitNow = false) { continuation.resumeIfActive(Unit) }
         }
-        navigator.stackFragments[0].waitForChild()
+        navigator.stackFragments[navigator.initialIndex].waitForChild()
     }
 
     private suspend fun StackFragment.waitForChild(): Fragment {
